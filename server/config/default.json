@@ -1,0 +1,11 @@
+{
+    "smsKeys" : {
+        "accountSid" : "ACb5409d439ca007f26808a791790b2abd",
+        "authToken" : "00b748f3a65958b5b110bc79bbf2afbe",
+        "myPhoneNumber": "+18454129036"
+    },
+    "emailKeys" : {
+        "username" : "rh@wallacetech.com.au",
+        "password" : "testing2022!"
+    }
+}
