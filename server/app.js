@@ -1,7 +1,6 @@
 import express from "express";
 import { scheduleJob } from "node-schedule";
-import sendSMS from "./job.js";
-import sendEmail from "./utils/email.js";
+
 
 const app = express();
 
@@ -81,19 +80,19 @@ app.post(
       await taskData.save();
 
       //Validation email and sms
-      sendEmail({
-        to: req.body.email,
-        subject: "Welcome Email - Walter Leo Solutions",
-        html: `Hi ${req.body.firstname} <br /> Thank you for registering with us.
-        Please <a href="https://walterleo.herokuapp.com/api/email/verify/${registerdata.token.email}">click this link </a>
-        to activate and verify your email address`,
+      // sendEmail({
+      //   to: req.body.email,
+      //   subject: "Welcome Email - Walter Leo Solutions",
+      //   html: `Hi ${req.body.firstname} <br /> Thank you for registering with us.
+      //   Please <a href="https://walterleo.herokuapp.com/api/email/verify/${registerdata.token.email}">click this link </a>
+      //   to activate and verify your email address`,
   
-      });
-      sendSMS({
-        body: `Hi ${req.body.firstname} <br /> Thank you for registering with us. Please click the link https://walterleo.herokuapp.com/api/phone/verify/${registerdata.token.phone}
-        to activate and verify your phone number`,
-        to: req.body.phone
-      });
+      // });
+      // sendSMS({
+      //   body: `Hi ${req.body.firstname} <br /> Thank you for registering with us. Please click the link https://walterleo.herokuapp.com/api/phone/verify/${registerdata.token.phone}
+      //   to activate and verify your phone number`,
+      //   to: req.body.phone
+      // });
 
       //Send reminders to phone
 
