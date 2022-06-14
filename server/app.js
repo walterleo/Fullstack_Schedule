@@ -11,6 +11,7 @@ import "./dbConnect.js";
 
 
 app.use(express.json());
+
 app.use(express.static("build"));
 
 import Tasks from "./models/Tasks.js";
