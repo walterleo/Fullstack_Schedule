@@ -159,12 +159,12 @@ app.post(
         to: req.body.email,
         subject: "Welcome Email - Walter Leo Solutions",
         html: `Hi ${req.body.firstname} <br /> Thank you for registering with us.
-        Please <a href="https://walterleo.herokuapp.com/api/email/verify/${userData.token.email}">click this link </a>
+        Please <a href="https://still-plains-50637.herokuapp.com/api/email/verify/${userData.token.email}">click this link </a>
         to activate and verify your email address`,
   
       });
       sendSMS({
-        body: `Hi ${req.body.firstname} <br /> Thank you for registering with us. Please click the link https://walterleo.herokuapp.com/api/phone/verify/${userData.token.phone}
+        body: `Hi ${req.body.firstname} <br /> Thank you for registering with us. Please click the link https://still-plains-50637.herokuapp.com/api/phone/verify/${userData.token.phone}
         to activate and verify your phone number`,
         to: req.body.phone
       });
