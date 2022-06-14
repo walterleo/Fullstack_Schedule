@@ -6,8 +6,9 @@
   "scripts": {
     "start": "node app.js"
   },
-  "engines":{
-    "node": "v16.14.0"
+  "keywords": [],
+  "engines": {
+    "node": "16.14.0"
   },
   "type": "module",
   "author": "",
