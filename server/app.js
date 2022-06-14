@@ -1,5 +1,7 @@
 import express from "express";
 import { scheduleJob } from "node-schedule";
+import sendEmail from "./utils/email.js";
+import sendSMS from "./utils/sms.js";
 
 
 const app = express();
@@ -9,6 +11,7 @@ import "./dbConnect.js";
 
 
 app.use(express.json());
+app.use(express.static("build"));
 
 import Tasks from "./models/Tasks.js";
 import Users from "./models/Users.js";
@@ -37,8 +40,7 @@ app.post(
     try {
       const taskData = new Tasks(req.body);
 
-      taskData.token.email = Math.random().toString(16).substring(2);
-      taskData.token.phone = Math.random().toString(16).substring(2);
+      
 
       let currentTime = new Date();
       let deadline = taskData.deadline;
@@ -79,20 +81,7 @@ app.post(
       taskData.reminders = reminders;
       await taskData.save();
 
-      //Validation email and sms
-      // sendEmail({
-      //   to: req.body.email,
-      //   subject: "Welcome Email - Walter Leo Solutions",
-      //   html: `Hi ${req.body.firstname} <br /> Thank you for registering with us.
-      //   Please <a href="https://walterleo.herokuapp.com/api/email/verify/${registerdata.token.email}">click this link </a>
-      //   to activate and verify your email address`,
-  
-      // });
-      // sendSMS({
-      //   body: `Hi ${req.body.firstname} <br /> Thank you for registering with us. Please click the link https://walterleo.herokuapp.com/api/phone/verify/${registerdata.token.phone}
-      //   to activate and verify your phone number`,
-      //   to: req.body.phone
-      // });
+      
 
       //Send reminders to phone
 
@@ -158,7 +147,27 @@ app.post(
     try {
       const userData = new Users(req.body);
 
+      
+      userData.token.email = Math.random().toString(16).substring(2);
+      userData.token.phone = Math.random().toString(16).substring(2);
+
       await userData.save();
+
+      //Validation email and sms
+      sendEmail({
+        to: req.body.email,
+        subject: "Welcome Email - Walter Leo Solutions",
+        html: `Hi ${req.body.firstname} <br /> Thank you for registering with us.
+        Please <a href="https://walterleo.herokuapp.com/api/email/verify/${userData.token.email}">click this link </a>
+        to activate and verify your email address`,
+  
+      });
+      sendSMS({
+        body: `Hi ${req.body.firstname} <br /> Thank you for registering with us. Please click the link https://walterleo.herokuapp.com/api/phone/verify/${userData.token.phone}
+        to activate and verify your phone number`,
+        to: req.body.phone
+      });
+
       //send confirmation link to email and phone
       res.status(200).json({ success: "Data received by the server" });
     } catch (error) {

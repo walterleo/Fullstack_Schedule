@@ -4,7 +4,10 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "node app.js"
+  },
+  "engines":{
+    "node": "v16.14.0"
   },
   "type": "module",
   "author": "",
