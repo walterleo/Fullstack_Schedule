@@ -7,5 +7,6 @@
     "emailKeys" : {
         "username" : "rh@wallacetech.com.au",
         "password" : "testing2022!"
-    }
+    },
+    "url": "https://walter-mern-1.herokuapp.com"
 }

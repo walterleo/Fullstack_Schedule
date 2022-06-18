@@ -2,17 +2,24 @@ import express from "express";
 import { scheduleJob } from "node-schedule";
 import sendEmail from "./utils/email.js";
 import sendSMS from "./utils/sms.js";
-
+import cors from "cors";
+import config from "config";
+import path from "path";
 
 const app = express();
 
 const port = process.env.PORT || 5000;
 import "./dbConnect.js";
 
-
 app.use(express.json());
 
-app.use(express.static("build"));
+const __dirname = path.resolve();
+app.use(express.static(path.join(__dirname, "build")));
+app.get("/*", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
+});
+
+app.use(cors());
 
 import Tasks from "./models/Tasks.js";
 import Users from "./models/Users.js";
@@ -40,8 +47,6 @@ app.post(
   async (req, res) => {
     try {
       const taskData = new Tasks(req.body);
-
-      
 
       let currentTime = new Date();
       let deadline = taskData.deadline;
@@ -81,8 +86,6 @@ app.post(
 
       taskData.reminders = reminders;
       await taskData.save();
-
-      
 
       //Send reminders to phone
 
@@ -148,7 +151,6 @@ app.post(
     try {
       const userData = new Users(req.body);
 
-      
       userData.token.email = Math.random().toString(16).substring(2);
       userData.token.phone = Math.random().toString(16).substring(2);
 
@@ -158,15 +160,22 @@ app.post(
       sendEmail({
         to: req.body.email,
         subject: "Welcome Email - Walter Leo Solutions",
-        html: `Hi ${req.body.firstname} <br /> Thank you for registering with us.
-        Please <a href="https://still-plains-50637.herokuapp.com/api/email/verify/${userData.token.email}">click this link </a>
+        html: `Hi ${
+          req.body.firstname
+        } <br /> Thank you for registering with us.
+        Please <a href="${config.get("url")}/api/email/verify/${
+          userData.token.email
+        }">click this link </a>
         to activate and verify your email address`,
-  
       });
       sendSMS({
-        body: `Hi ${req.body.firstname} <br /> Thank you for registering with us. Please click the link https://still-plains-50637.herokuapp.com/api/phone/verify/${userData.token.phone}
+        body: `Hi ${
+          req.body.firstname
+        }  Thank you for registering with us. Please click the link ${config.get(
+          "url"
+        )}/api/phone/verify/${userData.token.phone}
         to activate and verify your phone number`,
-        to: req.body.phone
+        to: req.body.phone,
       });
 
       //send confirmation link to email and phone
@@ -177,6 +186,56 @@ app.post(
     }
   }
 );
+
+/*
+API : /api/email/verify/:token
+Method : GET
+Desc : This API is to verify the email address
+*/
+app.get("https://walter-mern-1.herokuapp.com/api/email/verify/:token", async (req, res) => {
+  try {
+    const userdata = await Users.findOne({
+      "token.email": req.params.token,
+    });
+    if (!userdata)
+      return res.send("User Token is Invalid. Email is not verified.");
+
+    if (userdata.userVerified.email) {
+      return res.send("User Email is already Verified");
+    }
+    userdata.userVerified.email = true;
+    await userdata.save();
+    res.send("User Email is successfully Verified");
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+/*
+API : /api/phone/verify/:token
+Method : GET
+Desc : This API is to verify the email address
+*/
+app.get("https://walter-mern-1.herokuapp.com/api/phone/verify/:token", async (req, res) => {
+  try {
+    const userSmsdata = await Users.findOne({
+      "token.phone": req.params.token,
+    });
+    if (!userSmsdata)
+      return res.send("User Token is Invalid. Phone is not verified.");
+
+    if (userSmsdata.userVerified.phone) {
+      return res.send("User phone is already verified");
+    }
+    userSmsdata.userVerified.phone = true;
+    await userSmsdata.save();
+    res.send("User phone is successfully Verified");
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("DB Validation Failed");
+  }
+});
 
 app.listen(port, () => {
   console.log(`Server started at ${port}`);
