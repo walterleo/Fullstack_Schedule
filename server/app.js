@@ -2,24 +2,12 @@ import express from "express";
 import { scheduleJob } from "node-schedule";
 import sendEmail from "./utils/email.js";
 import sendSMS from "./utils/sms.js";
-import cors from "cors";
 import config from "config";
 import path from "path";
-
 const app = express();
 
 const port = process.env.PORT || 5000;
 import "./dbConnect.js";
-
-app.use(express.json());
-
-const __dirname = path.resolve();
-app.use(express.static(path.join(__dirname, "build")));
-app.get("/*", (req, res) => {
-  res.sendFile(path.join(__dirname, "build", "index.html"));
-});
-
-app.use(cors());
 
 import Tasks from "./models/Tasks.js";
 import Users from "./models/Users.js";
@@ -30,8 +18,13 @@ import {
   errorMiddleware,
 } from "./middlewares/validations/index.js";
 
-app.get("/", (req, res) => {
-  res.send("Hello from the backend");
+app.use(express.json());
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use(express.static(path.join(__dirname, "build")));
++app.get('/*', function (req, res) {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
 /*
@@ -192,7 +185,7 @@ API : /api/email/verify/:token
 Method : GET
 Desc : This API is to verify the email address
 */
-app.get("https://walter-mern-1.herokuapp.com/api/email/verify/:token", async (req, res) => {
+app.get("/api/email/verify/:token", async (req, res) => {
   try {
     const userdata = await Users.findOne({
       "token.email": req.params.token,
@@ -217,7 +210,7 @@ API : /api/phone/verify/:token
 Method : GET
 Desc : This API is to verify the email address
 */
-app.get("https://walter-mern-1.herokuapp.com/api/phone/verify/:token", async (req, res) => {
+app.get("/api/phone/verify/:token", async (req, res) => {
   try {
     const userSmsdata = await Users.findOne({
       "token.phone": req.params.token,
