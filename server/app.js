@@ -191,14 +191,14 @@ app.get("/api/email/verify/:token", async (req, res) => {
       "token.email": req.params.token,
     });
     if (!userdata)
-      return res.send("User Token is Invalid. Email is not verified.");
+      return res.redirect("/user/verifyerror");
 
     if (userdata.userVerified.email) {
-      return res.send("User Email is already Verified");
+      return res.redirect("/user/verifysuccess");
     }
     userdata.userVerified.email = true;
     await userdata.save();
-    res.send("User Email is successfully Verified");
+    res.redirect("/user/verifysuccess");
   } catch (error) {
     console.log(error);
     res.status(500).send("Internal Server Error");
