@@ -8,5 +8,5 @@
         "username" : "rh@wallacetech.com.au",
         "password" : "testing2022!"
     },
-    "url": "http://34.125.203.60"
+    "url": "http://localhost:3520"
 }

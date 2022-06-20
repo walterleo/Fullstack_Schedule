@@ -156,20 +156,20 @@ app.post(
         html: `Hi ${
           req.body.firstname
         } <br /> Thank you for registering with us.
-        Please <a href="${config.get("url")}/api/email/verify/${
+        Please <a href="${config.get("url")}/user/verify/${
           userData.token.email
         }">click this link </a>
         to activate and verify your email address`,
       });
-      sendSMS({
-        body: `Hi ${
-          req.body.firstname
-        }  Thank you for registering with us. Please click the link ${config.get(
-          "url"
-        )}/api/phone/verify/${userData.token.phone}
-        to activate and verify your phone number`,
-        to: req.body.phone,
-      });
+      // sendSMS({
+      //   body: `Hi ${
+      //     req.body.firstname
+      //   }  Thank you for registering with us. Please click the link ${config.get(
+      //     "url"
+      //   )}/api/phone/verify/${userData.token.phone}
+      //   to activate and verify your phone number`,
+      //   to: req.body.phone,
+      // });
 
       //send confirmation link to email and phone
       res.status(200).json({ success: "Data received by the server" });

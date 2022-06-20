@@ -1,6 +1,8 @@
 import React from "react";
-
-function Success() {
+import { useParams } from "react-router-dom";
+function Verify() {
+  let params = useParams();
+  console.log(params);
   return (
     <center>
       <div>
@@ -10,4 +12,4 @@ function Success() {
   );
 }
 
-export default Success;
+export default Verify;
