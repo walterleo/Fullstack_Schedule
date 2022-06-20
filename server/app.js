@@ -156,20 +156,20 @@ app.post(
         html: `Hi ${
           req.body.firstname
         } <br /> Thank you for registering with us.
-        Please <a href="${config.get("url")}/api/email/verify/${
+        Please <a href="${config.get("url")}/user/verify/${
           userData.token.email
         }">click this link </a>
         to activate and verify your email address`,
       });
-      sendSMS({
-        body: `Hi ${
-          req.body.firstname
-        }  Thank you for registering with us. Please click the link ${config.get(
-          "url"
-        )}/api/phone/verify/${userData.token.phone}
-        to activate and verify your phone number`,
-        to: req.body.phone,
-      });
+      // sendSMS({
+      //   body: `Hi ${
+      //     req.body.firstname
+      //   }  Thank you for registering with us. Please click the link ${config.get(
+      //     "url"
+      //   )}/api/phone/verify/${userData.token.phone}
+      //   to activate and verify your phone number`,
+      //   to: req.body.phone,
+      // });
 
       //send confirmation link to email and phone
       res.status(200).json({ success: "Data received by the server" });
@@ -191,14 +191,14 @@ app.get("/api/email/verify/:token", async (req, res) => {
       "token.email": req.params.token,
     });
     if (!userdata)
-      return res.send("User Token is Invalid. Email is not verified.");
+      return res.redirect("/user/verifyerror");
 
     if (userdata.userVerified.email) {
-      return res.send("User Email is already Verified");
+      return res.redirect("/user/verifysuccess");
     }
     userdata.userVerified.email = true;
     await userdata.save();
-    res.send("User Email is successfully Verified");
+    res.redirect("/user/verifysuccess");
   } catch (error) {
     console.log(error);
     res.status(500).send("Internal Server Error");
