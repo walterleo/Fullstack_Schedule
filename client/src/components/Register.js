@@ -24,7 +24,7 @@ function Register() {
       e.preventDefault();
 
       console.log(register);
-      const res = await axios.post("https://walter-mern-1.herokuapp.com/api/users/register", register);
+      const res = await axios.post("/api/users/register", register);
       setRegister({
         success: res.data,
       });
