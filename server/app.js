@@ -3,7 +3,7 @@ import { scheduleJob } from "node-schedule";
 import sendEmail from "./utils/email.js";
 import sendSMS from "./utils/sms.js";
 import config from "config";
-import path from "path";
+
 const app = express();
 
 const port = process.env.PORT || 5000;
@@ -19,13 +19,7 @@ import {
 } from "./middlewares/validations/index.js";
 
 app.use(express.json());
-import { fileURLToPath } from 'url';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-app.use(express.static(path.join(__dirname, "build")));
-+app.get('/*', function (req, res) {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
+
 
 /*
 API : /api/user/task
@@ -142,6 +136,8 @@ app.post(
 
   async (req, res) => {
     try {
+      const users = await Users.findOne({ email: req.body.email });
+      if (users) return res.status(500).json({ error: "User Registered Already" });
       const userData = new Users(req.body);
 
       userData.token.email = Math.random().toString(16).substring(2);
@@ -156,26 +152,26 @@ app.post(
         html: `Hi ${
           req.body.firstname
         } <br /> Thank you for registering with us.
-        Please <a href="${config.get("url")}/user/verify/${
+        Please <a href="${config.get("url")}/api/email/verify/${
           userData.token.email
         }">click this link </a>
         to activate and verify your email address`,
       });
-      // sendSMS({
-      //   body: `Hi ${
-      //     req.body.firstname
-      //   }  Thank you for registering with us. Please click the link ${config.get(
-      //     "url"
-      //   )}/api/phone/verify/${userData.token.phone}
-      //   to activate and verify your phone number`,
-      //   to: req.body.phone,
-      // });
+      sendSMS({
+        body: `Hi ${
+          req.body.firstname
+        }  Thank you for registering with us. Please click the link ${config.get(
+          "url"
+        )}/api/phone/verify/${userData.token.phone}
+        to activate and verify your phone number`,
+        to: req.body.phone,
+      });
 
       //send confirmation link to email and phone
-      res.status(200).json({ success: "Data received by the server" });
+      res.status(200).json({ success: "User registered successfully" });
     } catch (error) {
       console.log(error);
-      res.status(500).json({ error: "DB validation failed" });
+      res.status(500).json({ error: "Server Error." });
     }
   }
 );
@@ -191,14 +187,14 @@ app.get("/api/email/verify/:token", async (req, res) => {
       "token.email": req.params.token,
     });
     if (!userdata)
-      return res.redirect("/user/verifyerror");
+      return res.send("<h1>User Token is Invalid. Email is not verified.</h1>");
 
     if (userdata.userVerified.email) {
-      return res.redirect("/user/verifysuccess");
+      return res.send("<h1>User Email is Already Verified</h1>");
     }
     userdata.userVerified.email = true;
     await userdata.save();
-    res.redirect("/user/verifysuccess");
+    res.send("<h1>User Email is Verified Succesfully</h1>");
   } catch (error) {
     console.log(error);
     res.status(500).send("Internal Server Error");
@@ -226,7 +222,7 @@ app.get("/api/phone/verify/:token", async (req, res) => {
     res.send("User phone is successfully Verified");
   } catch (error) {
     console.log(error);
-    res.status(500).send("DB Validation Failed");
+    res.status(500).send("Internal Server Error");
   }
 });
 

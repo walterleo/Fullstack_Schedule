@@ -23,14 +23,9 @@ function Register() {
     try {
       e.preventDefault();
 
-      console.log(register);
-      const res = await axios.post(
-        "http://34.125.203.60:5000/api/users/register",
-        register
-      );
-      console.log(res.data);
+     await axios.post("/api/users/register", register);
+      navigate("/login");
     } catch (error) {
-      console.log(error.response.data);
       navigate("/user/verifyerror");
     }
   };
