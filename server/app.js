@@ -3,6 +3,7 @@ import { scheduleJob } from "node-schedule";
 import sendEmail from "./utils/email.js";
 import sendSMS from "./utils/sms.js";
 import config from "config";
+import bcrypt from "bcrypt";
 
 const app = express();
 
@@ -16,10 +17,10 @@ import {
   newTaskValidationRules,
   userRegistrationRules,
   errorMiddleware,
+  userLoginRules,
 } from "./middlewares/validations/index.js";
 
 app.use(express.json());
-
 
 /*
 API : /api/user/task
@@ -137,9 +138,10 @@ app.post(
   async (req, res) => {
     try {
       const users = await Users.findOne({ email: req.body.email });
-      if (users) return res.status(500).json({ error: "User Registered Already" });
+      if (users)
+        return res.status(500).json({ error: "User Registered Already" });
       const userData = new Users(req.body);
-
+      userData.password = await bcrypt.hash(req.body.password, 12);
       userData.token.email = Math.random().toString(16).substring(2);
       userData.token.phone = Math.random().toString(16).substring(2);
 
@@ -225,6 +227,37 @@ app.get("/api/phone/verify/:token", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
+
+/*
+  API : /api/login
+  Method : POST
+  Desc : User Login Api
+
+*/
+app.post(
+  "/api/login",
+  userLoginRules(),
+  errorMiddleware,
+
+  async (req, res) => {
+    try {
+      const user = await Users.findOne({ email: req.body.email });
+      if (!user) {
+        return res.status(401).json({ error: "Email is not in the DataBase." });
+      }
+      //Test for password
+      const isValid = await bcrypt.compare(req.body.password, user.password);
+      if (!isValid) {
+        return res.status(401).json({ error: "Invalid Credentials" });
+      }
+      //send confirmation link to email and phone
+      res.status(200).json({ success: "User login successfully" });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: "Server Error." });
+    }
+  }
+);
 
 app.listen(port, () => {
   console.log(`Server started at ${port}`);
