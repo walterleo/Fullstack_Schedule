@@ -24,19 +24,14 @@ function Register() {
       e.preventDefault();
 
       console.log(register);
-      const res = await axios.post("/api/users/register", register);
-      setRegister({
-        success: res.data,
-      });
-      setTimeout(() => {
-        setRegister({
-          success: null,
-        });
-      }, 3000);
-      navigate("/login");
+      const res = await axios.post(
+        "http://34.125.203.60:5000/api/users/register",
+        register
+      );
+      console.log(res.data);
     } catch (error) {
       console.log(error.response.data);
-      navigate("/login");
+      navigate("/user/verifyerror");
     }
   };
 
@@ -108,10 +103,7 @@ function Register() {
           onChange={onChange}
         />
         <hr />
-        <p>
-          By creating an account you agree to our{" "}
-          <a href="#">Terms & Privacy</a>.
-        </p>
+        <p>By creating an account you agree to our terms</p>
 
         <button type="submit" className="registerbtn">
           Register
