@@ -1,6 +1,5 @@
 import React from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
 
 class Dashboard extends React.Component {
   constructor() {
@@ -80,7 +79,7 @@ class Dashboard extends React.Component {
             <option value="both">Both</option>
           </select>
           <hr />
-          <input type="checkbox" name="agree" value="agree" onChange={this.onChange} value={this.state.schedule.agree}></input>
+          <input type="checkbox" name="agree" onChange={this.onChange} value={this.state.schedule.agree}></input>
 
           <label htmlFor="agree">
             {" "}

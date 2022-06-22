@@ -4,7 +4,7 @@ function Error() {
   return (
     <center>
       <div style={{color:"red"}}>
-        <h1>User Token is Invalid. Email is not verified.</h1>
+        <h1>Something Went Wrong</h1>
       </div>
     </center>
   );
