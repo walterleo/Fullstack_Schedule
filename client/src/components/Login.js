@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function Login() {
   const [login, setLogin] = useState({ email: "", password: "" });
@@ -9,14 +10,16 @@ function Login() {
       [e.target.name]: e.target.value,
     });
   };
-
-  const onSubmit = (e) => {
+  let navigate = useNavigate();
+  const onSubmit = async (e) => {
     e.preventDefault();
-    console.log(login);
-    //   console.log(res.data);
-    // } catch (error) {
-    //   console.log(error.response.data);
-    // }
+    try {
+      const res = await axios.post("/api/login", login);
+      navigate("/dashboard");
+    } catch (error) {
+      console.log(error.response.data);
+      navigate("/user/verifyerror");
+    }
   };
   return (
     <form onSubmit={onSubmit}>

@@ -22,6 +22,7 @@ function Register() {
   const onSubmit = async (e) => {
     try {
       e.preventDefault();
+
       const res = await axios.post(
         "/api/users/register",
         register
@@ -29,6 +30,7 @@ function Register() {
       navigate("/login");
     } catch (error) {
       navigate("/user/verifyerror/");
+
     }
   };
 

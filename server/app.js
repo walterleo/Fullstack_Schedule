@@ -3,7 +3,8 @@ import { scheduleJob } from "node-schedule";
 import sendEmail from "./utils/email.js";
 import sendSMS from "./utils/sms.js";
 import config from "config";
-import path from "path";
+import bcrypt from "bcrypt";
+
 const app = express();
 
 const port = process.env.PORT || 5000;
@@ -16,16 +17,10 @@ import {
   newTaskValidationRules,
   userRegistrationRules,
   errorMiddleware,
+  userLoginRules,
 } from "./middlewares/validations/index.js";
 
 app.use(express.json());
-import { fileURLToPath } from 'url';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-app.use(express.static(path.join(__dirname, "build")));
-+app.get('/*', function (req, res) {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
 
 /*
 API : /api/user/task
@@ -141,9 +136,11 @@ app.post(
   async (req, res) => {
     try {
       const users = await Users.findOne({ email: req.body.email });
-      if (users) return res.status(500).json({ error: "User Registered Already" });
-      const userData = new Users(req.body);
+      if (users)
+        return res.status(500).json({ error: "User Registered Already" });
 
+      const userData = new Users(req.body);
+      userData.password = await bcrypt.hash(req.body.password, 12);
       userData.token.email = Math.random().toString(16).substring(2);
       userData.token.phone = Math.random().toString(16).substring(2);
 
@@ -153,10 +150,12 @@ app.post(
       sendEmail({
         to: req.body.email,
         subject: "Welcome Email - Walter Leo Solutions",
-        html: `Hi ${req.body.firstname
-          } <br /> Thank you for registering with us.
-        Please <a href="${config.get("url")}/user/verify/${userData.token.email
-          }">click this link </a>
+        html: `Hi ${
+          req.body.firstname
+        } <br /> Thank you for registering with us.
+        Please <a href="${config.get("url")}/api/email/verify/${
+          userData.token.email
+        }">click this link </a>
         to activate and verify your email address`,
       });
       sendSMS({
@@ -170,7 +169,7 @@ app.post(
       });
 
       //send confirmation link to email and phone
-      res.status(200).json({ success: "Data received by the server" });
+      res.status(200).json({ success: "User registered successfully" });
     } catch (error) {
       console.log(error);
       res.status(500).json({ error: "Server Error." });
@@ -189,14 +188,14 @@ app.get("/api/email/verify/:token", async (req, res) => {
       "token.email": req.params.token,
     });
     if (!userdata)
-      return res.redirect("/user/verifyerror");
+      return res.send("<h1>User Token is Invalid. Email is not verified.</h1>");
 
     if (userdata.userVerified.email) {
-      return res.redirect("/user/verifysuccess");
+      return res.send("<h1>User Email is Already Verified</h1>");
     }
     userdata.userVerified.email = true;
     await userdata.save();
-    res.redirect("/user/verifysuccess");
+    res.send("<h1>User Email is Verified Succesfully</h1>");
   } catch (error) {
     console.log(error);
     res.status(500).send("Internal Server Error");
@@ -224,9 +223,40 @@ app.get("/api/phone/verify/:token", async (req, res) => {
     res.send("User phone is successfully Verified");
   } catch (error) {
     console.log(error);
-    res.status(500).send("DB Validation Failed");
+    res.status(500).send("Internal Server Error");
   }
 });
+
+/*
+  API : /api/login
+  Method : POST
+  Desc : User Login Api
+
+*/
+app.post(
+  "/api/login",
+  userLoginRules(),
+  errorMiddleware,
+
+  async (req, res) => {
+    try {
+      const user = await Users.findOne({ email: req.body.email });
+      if (!user) {
+        return res.status(401).json({ error: "Email is not in the DataBase." });
+      }
+      //Test for password
+      const isValid = await bcrypt.compare(req.body.password, user.password);
+      if (!isValid) {
+        return res.status(401).json({ error: "Invalid Credentials" });
+      }
+      //send confirmation link to email and phone
+      res.status(200).json({ success: "User login successfully" });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: "Server Error." });
+    }
+  }
+);
 
 app.listen(port, () => {
   console.log(`Server started at ${port}`);
