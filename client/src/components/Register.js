@@ -22,22 +22,21 @@ function Register() {
   const onSubmit = async (e) => {
     try {
       e.preventDefault();
-
-      console.log(register);
       const res = await axios.post(
-        "http://34.125.203.60:5000/api/users/register",
+        "/api/users/register",
         register
       );
-      console.log(res.data);
+      navigate("/login");
     } catch (error) {
-      console.log(error.response.data);
-      navigate("/user/verifyerror");
+      navigate("/user/verifyerror/");
     }
   };
 
   return (
     <form onSubmit={onSubmit}>
+
       <div className="container">
+
         <h1>Register</h1>
         <p>Please fill in this form to create an account.</p>
         <hr />

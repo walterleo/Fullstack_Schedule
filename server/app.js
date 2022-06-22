@@ -85,9 +85,8 @@ app.post(
       reminders.forEach((ele, index) => {
         scheduleJob(`job-${index}`, ele, function () {
           sendSMS({
-            body: `Reminder ${index + 1} about your task: ${
-              req.body.taskname
-            }  `,
+            body: `Reminder ${index + 1} about your task: ${req.body.taskname
+              }  `,
             to: req.body.taskphone,
           });
         });
@@ -97,9 +96,8 @@ app.post(
       reminders.forEach((ele, index) => {
         scheduleJob(`job-${index}`, ele, function () {
           sendEmail({
-            subject: `Reminder ${index + 1} about your task: ${
-              req.body.taskname
-            }  `,
+            subject: `Reminder ${index + 1} about your task: ${req.body.taskname
+              }  `,
             to: req.body.taskemail,
             html: `Hi!! do not forget your task`,
           });
@@ -142,6 +140,8 @@ app.post(
 
   async (req, res) => {
     try {
+      const users = await Users.findOne({ email: req.body.email });
+      if (users) return res.status(500).json({ error: "User Registered Already" });
       const userData = new Users(req.body);
 
       userData.token.email = Math.random().toString(16).substring(2);
@@ -153,29 +153,27 @@ app.post(
       sendEmail({
         to: req.body.email,
         subject: "Welcome Email - Walter Leo Solutions",
-        html: `Hi ${
-          req.body.firstname
-        } <br /> Thank you for registering with us.
-        Please <a href="${config.get("url")}/user/verify/${
-          userData.token.email
-        }">click this link </a>
+        html: `Hi ${req.body.firstname
+          } <br /> Thank you for registering with us.
+        Please <a href="${config.get("url")}/user/verify/${userData.token.email
+          }">click this link </a>
         to activate and verify your email address`,
       });
-      // sendSMS({
-      //   body: `Hi ${
-      //     req.body.firstname
-      //   }  Thank you for registering with us. Please click the link ${config.get(
-      //     "url"
-      //   )}/api/phone/verify/${userData.token.phone}
-      //   to activate and verify your phone number`,
-      //   to: req.body.phone,
-      // });
+      sendSMS({
+        body: `Hi ${
+          req.body.firstname
+        }  Thank you for registering with us. Please click the link ${config.get(
+          "url"
+        )}/api/phone/verify/${userData.token.phone}
+        to activate and verify your phone number`,
+        to: req.body.phone,
+      });
 
       //send confirmation link to email and phone
       res.status(200).json({ success: "Data received by the server" });
     } catch (error) {
       console.log(error);
-      res.status(500).json({ error: "DB validation failed" });
+      res.status(500).json({ error: "Server Error." });
     }
   }
 );
