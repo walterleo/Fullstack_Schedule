@@ -80,9 +80,8 @@ app.post(
       reminders.forEach((ele, index) => {
         scheduleJob(`job-${index}`, ele, function () {
           sendSMS({
-            body: `Reminder ${index + 1} about your task: ${
-              req.body.taskname
-            }  `,
+            body: `Reminder ${index + 1} about your task: ${req.body.taskname
+              }  `,
             to: req.body.taskphone,
           });
         });
@@ -92,9 +91,8 @@ app.post(
       reminders.forEach((ele, index) => {
         scheduleJob(`job-${index}`, ele, function () {
           sendEmail({
-            subject: `Reminder ${index + 1} about your task: ${
-              req.body.taskname
-            }  `,
+            subject: `Reminder ${index + 1} about your task: ${req.body.taskname
+              }  `,
             to: req.body.taskemail,
             html: `Hi!! do not forget your task`,
           });
@@ -140,6 +138,7 @@ app.post(
       const users = await Users.findOne({ email: req.body.email });
       if (users)
         return res.status(500).json({ error: "User Registered Already" });
+
       const userData = new Users(req.body);
       userData.password = await bcrypt.hash(req.body.password, 12);
       userData.token.email = Math.random().toString(16).substring(2);

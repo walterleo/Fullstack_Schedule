@@ -23,16 +23,22 @@ function Register() {
     try {
       e.preventDefault();
 
-     await axios.post("/api/users/register", register);
+      const res = await axios.post(
+        "/api/users/register",
+        register
+      );
       navigate("/login");
     } catch (error) {
-      navigate("/user/verifyerror");
+      navigate("/user/verifyerror/");
+
     }
   };
 
   return (
     <form onSubmit={onSubmit}>
+
       <div className="container">
+
         <h1>Register</h1>
         <p>Please fill in this form to create an account.</p>
         <hr />
