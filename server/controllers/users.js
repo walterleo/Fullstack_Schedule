@@ -147,9 +147,10 @@ router.get("/verify/email/:token", async (req, res) => {
         let payload = {
           user: user._id,
           email: user.email,
+          phone : user.phone
         };
         //send auth token to the client
-        const token = jwt.sign(payload, "hackingwalter", { expiresIn: 60 * 2 });
+        const token = jwt.sign(payload, "hackingwalter", { expiresIn: 60 * 60 });
   
         res.status(200).json({ token });
       } catch (error) {

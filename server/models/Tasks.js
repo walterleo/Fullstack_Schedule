@@ -1,14 +1,7 @@
 import mongoose from "mongoose";
 
 const tasksSchema = new mongoose.Schema({
-  taskemail: {
-    type: String,
-    required: true,
-  },
-  taskphone: {
-    type: String,
-    required: true,
-  },
+  
   taskname: {
     type: String,
     required: true,
@@ -26,7 +19,7 @@ const tasksSchema = new mongoose.Schema({
     required: true,
   },
   notificationType: {
-    type: Boolean,
+    type: String,
     default: false,
   },
  

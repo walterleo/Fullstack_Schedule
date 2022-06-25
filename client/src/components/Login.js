@@ -14,7 +14,7 @@ function Login() {
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("/api/login", login);
+      const res = await axios.post("/api/user/login", login);
       localStorage.setItem("token", res.data.token);
       navigate("/dashboard");
     } catch (error) {
