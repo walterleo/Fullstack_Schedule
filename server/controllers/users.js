@@ -5,6 +5,7 @@ import config from "config";
 
 
 import Users from "../models/Users.js";
+import Tasks from "../models/Tasks.js";
 import sendEmail from "../utils/email.js";
 import sendSMS from "../utils/sms.js";
 
@@ -37,8 +38,10 @@ router.post(
         userData.token.email = Math.random().toString(16).substring(2);
         userData.token.phone = Math.random().toString(16).substring(2);
   
+        const taskData = new Tasks();
+        taskData.user = userData._id;
         await userData.save();
-  
+        await taskData.save();
         //Validation email and sms
         sendEmail({
           to: req.body.email,

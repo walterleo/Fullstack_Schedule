@@ -1,28 +1,34 @@
 import mongoose from "mongoose";
 
 const tasksSchema = new mongoose.Schema({
-  
-  taskname: {
-    type: String,
-    required: true,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Users",
   },
-  deadline: {
-    type: Date,
-    required: true,
-  },
-  agree: {
-    type: Boolean,
-    required: true,
-  },
-  reminders: {
-    type: [Date],
-    required: true,
-  },
-  notificationType: {
-    type: String,
-    default: false,
-  },
- 
+  tasks: [
+    {
+      taskname: {
+        type: String,
+        required: true,
+      },
+      deadline: {
+        type: Date,
+        required: true,
+      },
+      agree: {
+        type: Boolean,
+        required: true,
+      },
+      reminders: {
+        type: [Date],
+        required: true,
+      },
+      notificationType: {
+        type: String,
+        default: false,
+      },
+    },
+  ],
 });
 
 const tasksModel = new mongoose.model("Tasks", tasksSchema, "tasks");

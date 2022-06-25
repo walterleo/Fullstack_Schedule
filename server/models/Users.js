@@ -24,12 +24,12 @@ const userSchema = new mongoose.Schema({
   },
   token: {
     email: { type: String, required: true },
-    phone: { type: String, required: true }
-},
-userVerified: {
+    phone: { type: String, required: true },
+  },
+  userVerified: {
     email: { type: Boolean, default: false },
-    phone: { type: Boolean, default: false }
-}
+    phone: { type: Boolean, default: false },
+  },
 });
 
 const usersModel = new mongoose.model("Users", userSchema, "users");
