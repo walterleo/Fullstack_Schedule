@@ -4,6 +4,7 @@ import sendEmail from "./utils/email.js";
 import sendSMS from "./utils/sms.js";
 import config from "config";
 import bcrypt from "bcrypt";
+import jwt  from "jsonwebtoken";
 
 const app = express();
 
@@ -249,8 +250,15 @@ app.post(
       if (!isValid) {
         return res.status(401).json({ error: "Invalid Credentials" });
       }
-      //send confirmation link to email and phone
-      res.status(200).json({ success: "User login successfully" });
+      //payload
+      let payload = {
+        user : user._id,
+        email : user.email
+      }
+      //send auth token to the client
+      const token = jwt.sign(payload, 'hackingwalter', { expiresIn: 60 * 2 });
+
+      res.status(200).json({ token });
     } catch (error) {
       console.log(error);
       res.status(500).json({ error: "Server Error." });
