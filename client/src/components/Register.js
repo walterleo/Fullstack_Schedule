@@ -24,7 +24,7 @@ function Register() {
       e.preventDefault();
 
       const res = await axios.post(
-        "/api/users/register",
+        "/api/user/register",
         register
       );
       navigate("/login");
