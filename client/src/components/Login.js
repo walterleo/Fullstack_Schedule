@@ -15,6 +15,7 @@ function Login() {
     e.preventDefault();
     try {
       const res = await axios.post("/api/login", login);
+      localStorage.setItem("token", res.data.token);
       navigate("/dashboard");
     } catch (error) {
       console.log(error.response.data);
