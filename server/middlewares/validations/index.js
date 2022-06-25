@@ -5,10 +5,7 @@ function newTaskValidationRules() {
     body(
       "taskname",
       "Taskname should be minimum 2 chars and maximum 150chars"
-    ).isLength({ min: 2, max: 150 }),
-    body("taskemail", "Taskemail should be valid email address").isEmail(),
-    body("taskphone", "Taskphone should be valid").isMobilePhone(),
-    body("isCompleted", "iscompleted should be a boolean").isBoolean(),
+    ).isLength({ min: 2, max: 150 })
   ];
 }
 
