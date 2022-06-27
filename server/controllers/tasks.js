@@ -26,10 +26,11 @@ router.post(
     try {
       let payload = req.payload;
 
-      const taskData = new Tasks(req.body);
-
+      const userTaskdata = await Tasks.findOne({ user: payload.user });
+      let taskData = req.body;
+     
       let currentTime = new Date();
-      let deadline = taskData.deadline;
+      let deadline = new Date(taskData.deadline);
       let milliseconds = deadline - currentTime;
       let seconds = Math.floor(milliseconds / 1000);
       let minutes = Math.floor(seconds / 60);
@@ -65,8 +66,12 @@ router.post(
       reminders.push(firstReminder, secondReminder, thirdReminder);
 
       taskData.reminders = reminders;
-      await taskData.save();
 
+      
+
+      userTaskdata.tasks.push(taskData);
+      await userTaskdata.save();
+      res.status(200).json({ success: "Job are scheduled by the server." });
       //Send reminders to phone
 
       reminders.forEach((ele, index) => {
@@ -92,8 +97,6 @@ router.post(
           });
         });
       });
-
-      res.status(200).json({ success: "Job are scheduled by the server." });
     } catch (error) {
       console.log(error);
       res.status(500).json({ error: "Internal Server error" });

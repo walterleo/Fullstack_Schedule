@@ -3,7 +3,6 @@ import axios from "axios";
 
 function Dashboard() {
   const [tasks, setTasks] = useState({
-    
     taskname: "",
     deadline: "",
     notificationType: "",
@@ -34,8 +33,12 @@ function Dashboard() {
       e.preventDefault();
       if(!tasks.agree) return alert("Please accept Terms");
       console.log(tasks);
-      // const res = await axios.post("/api/tasks/add", tasks);
-      // console.log(res.data);
+      const res = await axios.post("/api/tasks/add", tasks, {
+        headers : {
+          "x-auth-token" : localStorage.getItem("token")
+        }
+      });
+      console.log(res.data);
     } catch (error) {
       console.log(error.response.data);
     }
