@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
+import { useNavigate } from "react-router-dom";
 function Dashboard() {
+  const navigate = useNavigate()
   const [tasks, setTasks] = useState({
     taskname: "",
     deadline: "",
@@ -9,16 +11,22 @@ function Dashboard() {
     agree: false,
   });
 
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      navigate("/login");
+    }
+  }, []);
+
   const onChange = (e) => {
     if (e.target.name === "deadline") {
       setTasks({
         ...tasks,
         [e.target.name]: new Date(e.target.value),
       });
-    }else if(e.target.name === "agree"){
+    } else if (e.target.name === "agree") {
       setTasks({
         ...tasks,
-      agree: e.target.checked,
+        agree: e.target.checked,
       });
     } else {
       setTasks({
@@ -31,12 +39,12 @@ function Dashboard() {
   const onSubmit = async (e) => {
     try {
       e.preventDefault();
-      if(!tasks.agree) return alert("Please accept Terms");
+      if (!tasks.agree) return alert("Please accept Terms");
       console.log(tasks);
       const res = await axios.post("/api/tasks/add", tasks, {
-        headers : {
-          "x-auth-token" : localStorage.getItem("token")
-        }
+        headers: {
+          "x-auth-token": localStorage.getItem("token"),
+        },
       });
       console.log(res.data);
     } catch (error) {
@@ -80,7 +88,6 @@ function Dashboard() {
         </select>
         <hr />
         <input
-        
           type="checkbox"
           name="agree"
           onChange={onChange}
