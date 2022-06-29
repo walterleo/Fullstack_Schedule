@@ -1,40 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-
 import { useNavigate } from "react-router-dom";
+
 function Dashboard() {
   const navigate = useNavigate();
-  const [tasks, setTasks] = useState({
-    taskname: "",
-    deadline: "",
-    notificationType: "",
-    agree: false,
-  });
+
+  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    if (!localStorage.getItem("token")) {
-      navigate("/login");
+    async function fetchData() {
+      try {
+        const res = await axios.get("/api/tasks", {
+          headers: {
+            "x-auth-token": localStorage.getItem("token"),
+          },
+        });
+        setUserData(res.data.taskData);
+      } catch (error) {
+        localStorage.removeItem("token");
+        navigate("/login");
+      }
     }
-    // eslint-disable-next-line
+    fetchData();
   }, []);
 
-  const onChange = (e) => {
-    if (e.target.name === "deadline") {
-      setTasks({
-        ...tasks,
-        [e.target.name]: new Date(e.target.value),
-      });
-    } else if (e.target.name === "agree") {
-      setTasks({
-        ...tasks,
-        agree: e.target.checked,
-      });
-    } else {
-      setTasks({
-        ...tasks,
-        [e.target.name]: e.target.value,
-      });
-    }
+  const schedule = () => {
+    
+    navigate("/add");
   };
 
   const removeToken = () => {
@@ -42,78 +34,45 @@ function Dashboard() {
     navigate("/login");
   };
 
-  const onSubmit = async (e) => {
-    try {
-      e.preventDefault();
-      if (!tasks.agree) return alert("Please accept Terms");
-      console.log(tasks);
-      const res = await axios.post("/api/tasks/add", tasks, {
-        headers: {
-          "x-auth-token": localStorage.getItem("token"),
-        },
-      });
-      console.log(res.data);
-    } catch (error) {
-      console.log(error.response.data);
-    }
-  };
-
   return (
-    <form onSubmit={onSubmit}>
-      <div className="container">
-        <h1>Scheduler App</h1>
-        <hr />
+    <>
+      <nav>
+        <h2>
+          <button
+            type="submit"
+            className="btn2"
+            style={{ backgroundColor: "grey" }}
+            onClick={removeToken}
+          >
+            Log out
+          </button>
+          <button type="submit" className="btn2" onClick={schedule} >
+            Schedule Job
+          </button>
+        </h2>
+      </nav>
+      <div>
+        <h1 style={{ textTransform: "capitalize" }}>
+          Hello {userData && userData.firstname} !
+        </h1>
+        <div className="container2">
+          <h1 style={{ textAlign: "center" }}> All Scheduled Jobs</h1>
+          <hr />
+          <table id="tasklist">
+            <tr>
+              <th>_id</th>
+              <th>Task Name</th>
+              <th>Deadline</th>
+              <th>Notification Type</th>
+              <th>Task Status</th>
+              <th>Edit</th>
+              <th> Delete</th>
+            </tr>
 
-        <label htmlFor="taskname">
-          <b>Task Name</b>
-        </label>
-        <input
-          type="text"
-          placeholder="Enter your taskname"
-          name="taskname"
-          value={tasks.taskname}
-          onChange={onChange}
-        />
-
-        <label htmlFor="deadline">
-          <b>Deadline</b>
-        </label>
-        <input
-          type="datetime-local"
-          placeholder="Enter your Task Deadline"
-          name="deadline"
-          onChange={onChange}
-        />
-        <label htmlFor="notificationType">Notification Type</label>
-
-        <select name="notificationType" onChange={onChange}>
-          <option value="">Choose your Notification Type</option>
-          <option value="sms">SMS</option>
-          <option value="email">Email</option>
-          <option value="both">Both</option>
-        </select>
-        <hr />
-        <input
-          type="checkbox"
-          name="agree"
-          onChange={onChange}
-          value={tasks.agree}
-        ></input>
-
-        <label htmlFor="agree">
-          {" "}
-          By clicking Schedule Job Button below, you agree to receive emails and
-          messages as reminder notifications
-        </label>
-
-        <button type="submit" className="registerbtn">
-          Schedule Job
-        </button>
-        <button type="submit"  className="logoutbtn"  onClick={removeToken}>
-          Log out
-        </button>
+          </table>
+        </div>
       </div>
-    </form>
+    </>
   );
 }
 
