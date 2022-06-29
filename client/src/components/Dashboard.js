@@ -3,7 +3,7 @@ import axios from "axios";
 
 import { useNavigate } from "react-router-dom";
 function Dashboard() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState({
     taskname: "",
     deadline: "",
@@ -15,6 +15,7 @@ function Dashboard() {
     if (!localStorage.getItem("token")) {
       navigate("/login");
     }
+    // eslint-disable-next-line
   }, []);
 
   const onChange = (e) => {
@@ -34,6 +35,11 @@ function Dashboard() {
         [e.target.name]: e.target.value,
       });
     }
+  };
+
+  const removeToken = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
   };
 
   const onSubmit = async (e) => {
@@ -102,6 +108,9 @@ function Dashboard() {
 
         <button type="submit" className="registerbtn">
           Schedule Job
+        </button>
+        <button type="submit"  className="logoutbtn"  onClick={removeToken}>
+          Log out
         </button>
       </div>
     </form>
