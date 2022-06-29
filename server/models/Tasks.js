@@ -15,9 +15,9 @@ const tasksSchema = new mongoose.Schema({
         type: Date,
         required: true,
       },
-      agree: {
+      isCompleted: {
         type: Boolean,
-        required: true,
+        default: false,
       },
       reminders: {
         type: [Date],

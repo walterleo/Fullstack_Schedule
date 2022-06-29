@@ -28,7 +28,7 @@ router.post(
 
       const userTaskdata = await Tasks.findOne({ user: payload.user });
       let taskData = req.body;
-     
+
       let currentTime = new Date();
       let deadline = new Date(taskData.deadline);
       let milliseconds = deadline - currentTime;
@@ -66,8 +66,6 @@ router.post(
       reminders.push(firstReminder, secondReminder, thirdReminder);
 
       taskData.reminders = reminders;
-
-      
 
       userTaskdata.tasks.push(taskData);
       await userTaskdata.save();
@@ -120,4 +118,28 @@ Input Deadline date validation rules :
 
 */
 
+/*
+API : /api/tasks/
+Method : GET
+Desc : This API is to to fetch all the tasks of a user
+*/
+
+router.get("/", authMiddleware, async (req, res) => {
+  try {
+    let payload = req.payload;
+
+    const userTasks = await Tasks.findOne({ user: payload.user }).populate(
+      "user"
+    );
+    let taskData = {
+      email: userTasks.user.email,
+      firstname: userTasks.user.firstname,
+      tasks: userTasks.tasks,
+    };
+    res.status(200).json({ taskData });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server error" });
+  }
+});
 export default router;
