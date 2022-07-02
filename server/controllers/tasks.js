@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import { scheduleJob } from "node-schedule";
+import { scheduleJob, cancelJob, scheduledJobs } from "node-schedule";
 import sendEmail from "../utils/email.js";
 import sendSMS from "../utils/sms.js";
 import {
@@ -68,12 +68,14 @@ router.post(
       taskData.reminders = reminders;
 
       userTaskdata.tasks.push(taskData);
+      let taskid =
+        userTaskdata.tasks[userTaskdata.tasks.length - 1]._id.toString();
       await userTaskdata.save();
       res.status(200).json({ success: "Job are scheduled by the server." });
       //Send reminders to phone
 
       reminders.forEach((ele, index) => {
-        scheduleJob(`job-${index}`, ele, function () {
+        scheduleJob(`job-${index}-${taskid}`, ele, function () {
           if (taskData.notificationType == "email") {
             sendEmail({
               subject: `Reminder ${index + 1} about your task: ${
@@ -157,23 +159,33 @@ router.get("/", authMiddleware, async (req, res) => {
 
 /*
 API : /api/tasks/
-Method : GET
+Method : DELETE
 Desc : we are gonna delete the records
 */
 
-router.get("/", authMiddleware, async (req, res) => {
+router.delete("/:taskid", authMiddleware, async (req, res) => {
   try {
     let payload = req.payload;
 
-    const userTasks = await Tasks.delete({ user: payload.user }).populate(
-      "user"
+    const userTasks = await Tasks.findOne({ user: payload.user });
+    console.log(userTasks.tasks);
+    let matchIndex = userTasks.tasks.findIndex(
+      (ele) => ele._id == req.params.taskid
     );
-    let taskData = {
-      email: userTasks.user.email,
-      firstname: userTasks.user.firstname,
-      tasks: userTasks.tasks,
-    };
-    res.status(200).json({ taskData });
+    if (matchIndex == -1) {
+      return res.status(400).json({ error: "Invalid task id" });
+    }
+    //cancel jobs
+
+    userTasks.tasks[matchIndex].reminders.forEach((ele, index) => {
+      cancelJob(`job-${index}-${req.params.taskid}`);
+    });
+
+    userTasks.tasks = userTasks.tasks.filter(
+      (ele) => ele._id != req.params.taskid
+    );
+    await userTasks.save()
+    res.status(200).json({ success: "Task is deleted successfully" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal Server error" });

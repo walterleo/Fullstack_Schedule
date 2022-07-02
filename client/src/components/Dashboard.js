@@ -71,7 +71,7 @@ function Dashboard() {
             </thead>
             <tbody>{userData && userData.tasks.map((ele,index) => (
               <tr key={index}>
-                <td>{index+1}</td>
+                <td>{ele._id}</td>
                 <td>{ele.taskname}</td>
                 <td>{Date(ele.deadline)}</td>
                 <td>{ele.notificationType}</td>
