@@ -5,9 +5,12 @@ import { useNavigate } from "react-router-dom";
 function Dashboard() {
   const navigate = useNavigate();
 
+
+  const [taskData, setTasksData] = useState(null);
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
+    
     async function fetchData() {
       try {
         const res = await axios.get("/api/tasks", {
@@ -59,6 +62,7 @@ function Dashboard() {
           <h1 style={{ textAlign: "center" }}> All Scheduled Jobs</h1>
           <hr />
           <table id="tasklist">
+          <thead>
             <tr>
               <th>_id</th>
               <th>Task Name</th>
@@ -68,7 +72,19 @@ function Dashboard() {
               <th>Edit</th>
               <th> Delete</th>
             </tr>
-
+          </thead>
+          <tbody>
+      {/* {taskData.map((ele) => (
+        <tr key={ele.taskData.user}>
+        <td>{ele.taskData.taskname}</td>
+        <td>{ele.taskData.deadline}</td>
+        <td>{ele.taskData.isCompleted}</td>
+        <td>{ele.taskData.notificationType}</td>
+       
+        </tr>
+       ))
+      } */}
+         </tbody>
           </table>
         </div>
       </div>

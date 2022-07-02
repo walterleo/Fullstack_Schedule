@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
+
+
 function Login() {
+  let navigate = useNavigate();
   const [login, setLogin] = useState({ email: "", password: "" });
   const onChange = (e) => {
     setLogin({
@@ -10,7 +13,18 @@ function Login() {
       [e.target.name]: e.target.value,
     });
   };
-  let navigate = useNavigate();
+
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      navigate("/dashboard");
+    }
+    
+    // eslint-disable-next-line
+  }, []);
+  
+
+
+  
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -28,8 +42,6 @@ function Login() {
         <h1>Login</h1>
 
         <hr />
-
-       
 
         <label htmlFor="email">
           <b>Email</b>
