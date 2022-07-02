@@ -15,6 +15,7 @@ function ScheduleTasks() {
     if (!localStorage.getItem("token")) {
       navigate("/login");
     }
+    
     // eslint-disable-next-line
   }, []);
 
