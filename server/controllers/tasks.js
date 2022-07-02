@@ -173,7 +173,7 @@ router.delete("/:taskid", authMiddleware, async (req, res) => {
       (ele) => ele._id == req.params.taskid
     );
     if (matchIndex == -1) {
-      return res.status(400).json({ error: "Invalid task id" });
+      return res.status(200).json({ message: "Invalid task id" });
     }
     //cancel jobs
 
