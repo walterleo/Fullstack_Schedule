@@ -33,6 +33,25 @@ function Dashboard() {
     navigate("/login");
   };
 
+  const deletejob = async (taskid) => {
+    try {
+      const res = await axios.delete(`/api/tasks/${taskid}`, {
+        headers: {
+          "x-auth-token": localStorage.getItem("token"),
+        },
+      });
+      if (res.data.message) {
+        alert(res.data.message);
+      } else {
+        alert(res.data.success);
+      }
+      window.location.reload();
+    } catch (error) {
+      alert(error.response.data.error);
+      window.location.reload();
+    }
+  };
+
   return (
     <>
       <nav>
@@ -55,32 +74,56 @@ function Dashboard() {
           Hello {userData && userData.firstname} !
         </h1>
         <div className="container2">
-          <h1 style={{ textAlign: "center" }}> All Scheduled Jobs</h1>
-          <hr />
-          <table id="tasklist">
-            <thead>
-              <tr>
-                <th>_id</th>
-                <th>Task Name</th>
-                <th>Deadline</th>
-                <th>Notification Type</th>
-                <th>Task Status</th>
-                <th>Edit</th>
-                <th> Delete</th>
-              </tr>
-            </thead>
-            <tbody>{userData && userData.tasks.map((ele,index) => (
-              <tr key={index}>
-                <td>{ele._id}</td>
-                <td>{ele.taskname}</td>
-                <td>{Date(ele.deadline)}</td>
-                <td>{ele.notificationType}</td>
-                <td>{ele.isCompleted ? 'true' : 'false'}</td>
-                <td><button className="btn2" >Edit</button></td>
-                <td><button className="btn2" style={{color: "red", backgroundColor: "white"}} >Delete</button></td>
-              </tr>
-            ))}</tbody>
-          </table>
+          {userData && userData.tasks.length == 0 ? (
+            <>
+              <h1 style={{ textAlign: "center" }}>
+                {" "}
+                There are no Jobs currently
+              </h1>
+            </>
+          ) : (
+            <>
+              <h1 style={{ textAlign: "center" }}> All Scheduled Jobs</h1>
+              <hr />
+              <table id="tasklist">
+                <thead>
+                  <tr>
+                    <th>_id</th>
+                    <th>Task Name</th>
+                    <th>Deadline</th>
+                    <th>Notification Type</th>
+                    <th>Task Status</th>
+                    <th>Edit</th>
+                    <th> Delete</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {userData &&
+                    userData.tasks.map((ele, index) => (
+                      <tr key={index}>
+                        <td>{ele._id}</td>
+                        <td>{ele.taskname}</td>
+                        <td>{Date(ele.deadline)}</td>
+                        <td>{ele.notificationType}</td>
+                        <td>{ele.isCompleted ? "true" : "false"}</td>
+                        <td>
+                          <button className="btn2">Edit</button>
+                        </td>
+                        <td>
+                          <button
+                            className="btn2"
+                            style={{ color: "red", backgroundColor: "white" }}
+                            onClick={() => deletejob(ele._id)}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </>
+          )}
         </div>
       </div>
     </>
