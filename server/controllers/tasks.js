@@ -74,25 +74,37 @@ router.post(
 
       reminders.forEach((ele, index) => {
         scheduleJob(`job-${index}`, ele, function () {
-          sendSMS({
-            body: `Reminder ${index + 1} about your task: ${
-              req.body.taskname
-            }  `,
-            to: payload.phone,
-          });
-        });
-      });
+          if (taskData.notificationType == "email") {
+            sendEmail({
+              subject: `Reminder ${index + 1} about your task: ${
+                req.body.taskname
+              }  `,
+              to: payload.email,
+              html: `Hi!! do not forget your task`,
+            });
+          } else if (taskData.notificationType == "sms") {
+            sendSMS({
+              body: `Reminder ${index + 1} about your task: ${
+                req.body.taskname
+              }  `,
+              to: payload.phone,
+            });
+          } else {
+            sendEmail({
+              subject: `Reminder ${index + 1} about your task: ${
+                req.body.taskname
+              }  `,
+              to: payload.email,
+              html: `Hi!! do not forget your task`,
+            });
 
-      //Send reminders to email
-      reminders.forEach((ele, index) => {
-        scheduleJob(`job-${index}`, ele, function () {
-          sendEmail({
-            subject: `Reminder ${index + 1} about your task: ${
-              req.body.taskname
-            }  `,
-            to: payload.email,
-            html: `Hi!! do not forget your task`,
-          });
+            sendSMS({
+              body: `Reminder ${index + 1} about your task: ${
+                req.body.taskname
+              }  `,
+              to: payload.phone,
+            });
+          }
         });
       });
     } catch (error) {
@@ -129,6 +141,31 @@ router.get("/", authMiddleware, async (req, res) => {
     let payload = req.payload;
 
     const userTasks = await Tasks.findOne({ user: payload.user }).populate(
+      "user"
+    );
+    let taskData = {
+      email: userTasks.user.email,
+      firstname: userTasks.user.firstname,
+      tasks: userTasks.tasks,
+    };
+    res.status(200).json({ taskData });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server error" });
+  }
+});
+
+/*
+API : /api/tasks/
+Method : GET
+Desc : we are gonna delete the records
+*/
+
+router.get("/", authMiddleware, async (req, res) => {
+  try {
+    let payload = req.payload;
+
+    const userTasks = await Tasks.delete({ user: payload.user }).populate(
       "user"
     );
     let taskData = {

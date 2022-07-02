@@ -5,12 +5,9 @@ import { useNavigate } from "react-router-dom";
 function Dashboard() {
   const navigate = useNavigate();
 
-
-  const [taskData, setTasksData] = useState(null);
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    
     async function fetchData() {
       try {
         const res = await axios.get("/api/tasks", {
@@ -28,7 +25,6 @@ function Dashboard() {
   }, []);
 
   const schedule = () => {
-    
     navigate("/add");
   };
 
@@ -49,7 +45,7 @@ function Dashboard() {
           >
             Log out
           </button>
-          <button type="submit" className="btn2" onClick={schedule} >
+          <button type="submit" className="btn2" onClick={schedule}>
             Schedule Job
           </button>
         </h2>
@@ -62,29 +58,28 @@ function Dashboard() {
           <h1 style={{ textAlign: "center" }}> All Scheduled Jobs</h1>
           <hr />
           <table id="tasklist">
-          <thead>
-            <tr>
-              <th>_id</th>
-              <th>Task Name</th>
-              <th>Deadline</th>
-              <th>Notification Type</th>
-              <th>Task Status</th>
-              <th>Edit</th>
-              <th> Delete</th>
-            </tr>
-          </thead>
-          <tbody>
-      {/* {taskData.map((ele) => (
-        <tr key={ele.taskData.user}>
-        <td>{ele.taskData.taskname}</td>
-        <td>{ele.taskData.deadline}</td>
-        <td>{ele.taskData.isCompleted}</td>
-        <td>{ele.taskData.notificationType}</td>
-       
-        </tr>
-       ))
-      } */}
-         </tbody>
+            <thead>
+              <tr>
+                <th>_id</th>
+                <th>Task Name</th>
+                <th>Deadline</th>
+                <th>Notification Type</th>
+                <th>Task Status</th>
+                <th>Edit</th>
+                <th> Delete</th>
+              </tr>
+            </thead>
+            <tbody>{userData && userData.tasks.map((ele,index) => (
+              <tr key={index}>
+                <td>{index+1}</td>
+                <td>{ele.taskname}</td>
+                <td>{Date(ele.deadline)}</td>
+                <td>{ele.notificationType}</td>
+                <td>{ele.isCompleted ? 'true' : 'false'}</td>
+                <td><button className="btn2" >Edit</button></td>
+                <td><button className="btn2" style={{color: "red", backgroundColor: "white"}} >Delete</button></td>
+              </tr>
+            ))}</tbody>
           </table>
         </div>
       </div>

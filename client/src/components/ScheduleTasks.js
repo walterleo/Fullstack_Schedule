@@ -12,10 +12,21 @@ function ScheduleTasks() {
   });
 
   useEffect(() => {
-    if (!localStorage.getItem("token")) {
-      navigate("/login");
+    async function fetchData() {
+      try {
+        await axios.get("/api/tasks", {
+          headers: {
+            "x-auth-token": localStorage.getItem("token"),
+          },
+        });
+
+      } catch (error) {
+        localStorage.removeItem("token");
+        navigate("/login");
+      }
     }
-    
+    fetchData();
+
     // eslint-disable-next-line
   }, []);
 
@@ -39,7 +50,6 @@ function ScheduleTasks() {
   };
 
   const back = () => {
-    
     navigate("/dashboard");
   };
 
@@ -58,7 +68,7 @@ function ScheduleTasks() {
           "x-auth-token": localStorage.getItem("token"),
         },
       });
-      console.log(res.data);
+      navigate("/dashboard");
     } catch (error) {
       console.log(error.response.data);
     }
@@ -66,18 +76,18 @@ function ScheduleTasks() {
 
   return (
     <>
-        <nav>
-          <h2>
-            <button
-              type="submit"
-              className="btn2"
-              style={{ backgroundColor: "grey", float: "left" }}
-              onClick={back}
-            >
-              Go Back
-            </button>
-          </h2>
-        </nav>
+      <nav>
+        <h2>
+          <button
+            type="submit"
+            className="btn2"
+            style={{ backgroundColor: "grey", float: "left" }}
+            onClick={back}
+          >
+            Go Back
+          </button>
+        </h2>
+      </nav>
       <div className="container2" style={{ marginTop: "2%" }}>
         <form onSubmit={onSubmit}>
           <div className="container">
