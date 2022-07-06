@@ -168,7 +168,7 @@ router.delete("/:taskid", authMiddleware, async (req, res) => {
     let payload = req.payload;
 
     const userTasks = await Tasks.findOne({ user: payload.user });
-    console.log(userTasks.tasks);
+    // console.log(userTasks.tasks);
     let matchIndex = userTasks.tasks.findIndex(
       (ele) => ele._id == req.params.taskid
     );
@@ -184,11 +184,132 @@ router.delete("/:taskid", authMiddleware, async (req, res) => {
     userTasks.tasks = userTasks.tasks.filter(
       (ele) => ele._id != req.params.taskid
     );
-    await userTasks.save()
+    await userTasks.save();
     res.status(200).json({ success: "Task is deleted successfully" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal Server error" });
   }
 });
+
+/*
+API : /api/tasks/:taskid
+Method : PUT
+Desc : This API is to edit the existing task jobs and store the reminders
+*/
+
+router.put(
+  "/:taskid",
+  authMiddleware,
+  newTaskValidationRules(),
+  errorMiddleware,
+  async (req, res) => {
+    try {
+      let payload = req.payload;
+
+      const userTasks = await Tasks.findOne({ user: payload.user });
+      let matchIndex = userTasks.tasks.findIndex(
+        (ele) => ele._id == req.params.taskid
+      );
+      if (matchIndex == -1) {
+        return res.status(200).json({ message: "Invalid task id" });
+      }
+
+      let taskData = req.body;
+
+      let currentTime = new Date();
+      let deadline = new Date(taskData.deadline);
+      let milliseconds = deadline - currentTime;
+      let seconds = Math.floor(milliseconds / 1000);
+      let minutes = Math.floor(seconds / 60);
+      let hour = Math.floor(minutes / 60);
+      let day = Math.floor(hour / 24);
+      // test case 1 - backdated check
+
+      if (milliseconds < 0) {
+        return res.status(500).json({ error: "Deadline cannot be backdated" });
+      }
+      //test case 2 - checking if its within next 30 mins
+
+      if (minutes < 2) {
+        return res
+          .status(500)
+          .json({ error: "Deadline cannot be within next 30 mins" });
+      }
+      // test case 3 - It cannot be after 30 days from now
+      if (day > 30) {
+        return res
+          .status(500)
+          .json({ error: "Deadline cannot be after 30 days from now" });
+      }
+      let reminders = [];
+
+      let firstReminder = milliseconds / 4;
+      let secondReminder = milliseconds / 2;
+      let thirdReminder = milliseconds * (3 / 4);
+
+      firstReminder = new Date(+new Date() + firstReminder);
+      secondReminder = new Date(+new Date() + secondReminder);
+      thirdReminder = new Date(+new Date() + thirdReminder);
+
+      reminders.push(firstReminder, secondReminder, thirdReminder);
+
+      taskData.reminders = reminders;
+
+      userTasks.tasks[matchIndex] = taskData;
+      userTasks.tasks[matchIndex]._id = req.params.taskid;
+      let taskid = userTasks.tasks[matchIndex]._id.toString();
+      await userTasks.save();
+
+      res.status(200).json({ success: "Job are re-scheduled by the server." });
+      //cancel jobs
+
+      userTasks.tasks[matchIndex].reminders.forEach((ele, index) => {
+        cancelJob(`job-${index}-${req.params.taskid}`);
+      });
+      // set new reminders to phone
+
+      reminders.forEach((ele, index) => {
+        scheduleJob(`job-${index}-${taskid}`, ele, function () {
+          if (taskData.notificationType == "email") {
+            sendEmail({
+              subject: `Reminder ${index + 1} about your task: ${
+                req.body.taskname
+              }  `,
+              to: payload.email,
+              html: `Hi!! do not forget your task`,
+            });
+          } else if (taskData.notificationType == "sms") {
+            sendSMS({
+              body: `Reminder ${index + 1} about your task: ${
+                req.body.taskname
+              }  `,
+              to: payload.phone,
+            });
+            console.log(scheduledJobs);
+          } else {
+            sendEmail({
+              subject: `Reminder ${index + 1} about your task: ${
+                req.body.taskname
+              }  `,
+              to: payload.email,
+              html: `Hi!! do not forget your task`,
+            });
+
+            sendSMS({
+              body: `Reminder ${index + 1} about your task: ${
+                req.body.taskname
+              }  `,
+              to: payload.phone,
+            });
+          }
+        });
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: "Internal Server error" });
+    }
+  }
+);
+
 export default router;
