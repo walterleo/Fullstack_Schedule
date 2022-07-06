@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 function Dashboard() {
   const navigate = useNavigate();
 
+  const [isEdit, setisEdit] = useState(false);
+
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
@@ -52,6 +54,13 @@ function Dashboard() {
     }
   };
 
+  const isGonnaEdit = () => {
+    isEdit(true);
+  };
+  const convertDate = (date) => {
+    let newdate = new Date(date);
+    return newdate.toString();
+  };
   return (
     <>
       <nav>
@@ -103,7 +112,7 @@ function Dashboard() {
                       <tr key={index}>
                         <td>{ele._id}</td>
                         <td>{ele.taskname}</td>
-                        <td>{Date(ele.deadline)}</td>
+                        <td>{convertDate(ele.deadline)}</td>
                         <td>{ele.notificationType}</td>
                         <td>{ele.isCompleted ? "true" : "false"}</td>
                         <td>
