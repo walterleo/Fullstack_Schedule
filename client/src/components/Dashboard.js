@@ -4,7 +4,12 @@ import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
   const navigate = useNavigate();
-
+  const [tasks, setTasks] = useState({
+    taskname: "",
+    deadline: "",
+    notificationType: "",
+    isCompleted: "",
+  });
   const [isEdit, setisEdit] = useState(false);
 
   const [userData, setUserData] = useState(null);
@@ -26,6 +31,19 @@ function Dashboard() {
     fetchData();
   }, []);
 
+  const onChange = (e) => {
+    if (e.target.name === "deadline") {
+      setTasks({
+        ...tasks,
+        [e.target.name]: new Date(e.target.value),
+      });
+    }  else {
+      setTasks({
+        ...tasks,
+        [e.target.name]: e.target.value,
+      });
+    }
+  };
   const schedule = () => {
     navigate("/add");
   };
@@ -55,7 +73,29 @@ function Dashboard() {
   };
 
   const isGonnaEdit = () => {
-    isEdit(true);
+    setisEdit(true);
+  };
+  const isGonnaSave = async (taskid) => {
+    try{
+      
+      setisEdit(false);    
+     
+      const res = await axios.put(`/api/tasks/${taskid}`, tasks, {
+        headers: {
+          "x-auth-token": localStorage.getItem("token"),
+        },
+      });
+      if (res.data.message) {
+        alert(res.data.message);
+      } else {
+        alert(res.data.success);
+      }
+      window.location.reload();
+
+    }catch(error){
+      console.log(error);
+    }
+    
   };
   const convertDate = (date) => {
     let newdate = new Date(date);
@@ -106,30 +146,91 @@ function Dashboard() {
                     <th> Delete</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {userData &&
-                    userData.tasks.map((ele, index) => (
-                      <tr key={index}>
-                        <td>{ele._id}</td>
-                        <td>{ele.taskname}</td>
-                        <td>{convertDate(ele.deadline)}</td>
-                        <td>{ele.notificationType}</td>
-                        <td>{ele.isCompleted ? "true" : "false"}</td>
-                        <td>
-                          <button className="btn2">Edit</button>
-                        </td>
-                        <td>
-                          <button
-                            className="btn2"
-                            style={{ color: "red", backgroundColor: "white" }}
-                            onClick={() => deletejob(ele._id)}
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
+                {isEdit ? (
+                  <tbody>
+                    {userData &&
+                      userData.tasks.map((ele, index) => (
+                        <tr key={index}>
+                          <td>{index + 1}</td>
+                          <td width={"40%"}>
+                            <input
+                              type="text"
+                              placeholder="Enter your taskname"
+                              name="taskname"
+                              
+                              onChange={onChange}
+                            />
+                          </td>
+                          <td width={"20%"}>
+                            <input
+                              type="datetime-local"
+                              placeholder="Enter your Task Deadline"
+                              name="deadline"
+                              onChange={onChange}
+                            />
+                          </td>
+                          <td width={"20%"}>
+                            <select name="notificationType"  onChange={onChange}>
+                              <option value="">
+                                Choose your Notification Type
+                              </option>
+                              <option value="sms">SMS</option>
+                              <option value="email">Email</option>
+                              <option value="both">Both</option>
+                            </select>
+                          </td>
+                          <td width={"30%"}>
+                            <select name="isCompleted" onChange={onChange}>
+                            <option value="">Choose your Task status</option>
+                              <option value="true">True</option>
+                              <option value="false">False</option>
+                            </select>
+                          </td>
+                          <td>
+                            <button className="btn2" onClick={isGonnaSave} onClick={() => isGonnaSave(ele._id)}>
+                              Save
+                            </button>
+                          </td>
+                          <td>
+                            <button
+                              className="btn2"
+                              style={{ color: "red", backgroundColor: "white" }}
+                              onClick={() => deletejob(ele._id)}
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                ) : (
+                  <tbody>
+                    {userData &&
+                      userData.tasks.map((ele, index) => (
+                        <tr key={index}>
+                          <td>{ele._id}</td>
+                          <td>{ele.taskname}</td>
+                          <td>{convertDate(ele.deadline)}</td>
+                          <td>{ele.notificationType}</td>
+                          <td>{ele.isCompleted ? "true" : "false"}</td>
+                          <td>
+                            <button className="btn2" onClick={isGonnaEdit}>
+                              Edit
+                            </button>
+                          </td>
+                          <td>
+                            <button
+                              className="btn2"
+                              style={{ color: "red", backgroundColor: "white" }}
+                              onClick={() => deletejob(ele._id)}
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                )}
               </table>
             </>
           )}
