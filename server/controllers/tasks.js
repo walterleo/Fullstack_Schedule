@@ -216,7 +216,7 @@ router.put(
       }
 
       let taskData = req.body;
-
+      taskData.isCompleted = Boolean(req.body.isCompleted);
       let currentTime = new Date();
       let deadline = new Date(taskData.deadline);
       let milliseconds = deadline - currentTime;
@@ -307,7 +307,7 @@ router.put(
       });
     } catch (error) {
       console.log(error);
-      res.status(500).json({ error: "Internal Server error" });
+      res.status(500).json({ error: "Internal Server error2" });
     }
   }
 );
